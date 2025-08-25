@@ -1,6 +1,7 @@
 //------------------------------------------------------------------------------
 // Testbench: async_fifo_tb
 // Feature: exercises async_fifo with independent clocks and self-checking reads
+// Concept: models unrelated clock domains to demonstrate safe data passage
 // Variables:
 //   write_clk     - write domain clock
 //   write_reset_n - write domain reset (active low)
@@ -35,6 +36,7 @@ module async_fifo_tb;
     .full(full), .empty(empty)
   );
 
+  // two free-running clocks with different periods emulate asynchronous domains
   initial begin write_clk = 0; forever #5 write_clk = ~write_clk; end
   initial begin read_clk = 0; forever #7 read_clk = ~read_clk; end
 
@@ -60,7 +62,7 @@ module async_fifo_tb;
     end
     @(posedge write_clk); write_en = 0; // stop writing
 
-    // allow time before reading
+    // allow time before reading so writes propagate across clock boundary
     repeat (4) @(posedge read_clk);
 
     for (i = 0; i < DEPTH; i = i + 1) begin
