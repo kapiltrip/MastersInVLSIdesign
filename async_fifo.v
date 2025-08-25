@@ -41,27 +41,29 @@ module async_fifo #(
   output                    empty
 );
   reg [DATA_WIDTH-1:0] fifo_mem [0:DEPTH-1];
-  // refresher: fifo_mem is dual-ported conceptually, written and read by different clocks
+  // FIFO memory is accessed from two clock domains; arrays act as simple dual-port RAM
   reg [ADDR:0] write_ptr_bin, write_ptr_gray, read_ptr_bin, read_ptr_gray;
+  // Extra MSB (ADDR+1 bits) lets us detect when write and read pointers wrap around
   reg [ADDR:0] write_ptr_gray_sync1, write_ptr_gray_sync2;
   reg [ADDR:0] read_ptr_gray_sync1, read_ptr_gray_sync2;
   // write pointer and memory
   always @(posedge write_clk or negedge write_reset_n) begin
     if (!write_reset_n) write_ptr_bin <= 0;
+    // capture data only when FIFO has space; pointer advances in binary for easy arithmetic
     else if (write_en && !full) begin
       fifo_mem[write_ptr_bin[ADDR-1:0]] <= write_data; // store data at current pointer
-      write_ptr_bin <= write_ptr_bin + 1; // increment to next location
+      write_ptr_bin <= write_ptr_bin + 1;              // increment to next location
     end
   end
-  // refresher: Gray code conversion uses XOR so only one bit changes across domains
+  // convert binary pointer to Gray code so only one bit toggles between updates
   always @* write_ptr_gray = (write_ptr_bin >> 1) ^ write_ptr_bin;
-  // read pointer
+  // read pointer logic mirrors write side but operates on read clock
   always @(posedge read_clk or negedge read_reset_n) begin
     if (!read_reset_n) read_ptr_bin <= 0;
     else if (read_en && !empty) read_ptr_bin <= read_ptr_bin + 1; // move to next unread word
   end
   always @* read_ptr_gray = (read_ptr_bin >> 1) ^ read_ptr_bin;
-  assign read_data = fifo_mem[read_ptr_bin[ADDR-1:0]]; // refresher: data read in read clock domain
+  assign read_data = fifo_mem[read_ptr_bin[ADDR-1:0]]; // output data in read domain
   // synchronize pointers across domains
   always @(posedge write_clk or negedge write_reset_n) begin
     if (!write_reset_n) {read_ptr_gray_sync1, read_ptr_gray_sync2} <= 0;
@@ -71,16 +73,16 @@ module async_fifo #(
     if (!read_reset_n) {write_ptr_gray_sync1, write_ptr_gray_sync2} <= 0;
     else {write_ptr_gray_sync1, write_ptr_gray_sync2} <= {write_ptr_gray_sync2, write_ptr_gray};
   end
-  // refresher: double-registering reduces metastability when crossing clock domains
-  // convert gray to binary
+  // double-register the Gray pointers to suppress metastability when crossing clock domains
+  // convert synchronized Gray pointers back to binary for potential arithmetic/occupancy checks
   wire [ADDR:0] write_ptr_bin_sync, read_ptr_bin_sync;
   assign write_ptr_bin_sync = gray2bin(write_ptr_gray_sync2);
   assign read_ptr_bin_sync = gray2bin(read_ptr_gray_sync2);
   // status flags
-  // refresher: FIFO full when write pointer is one wrap ahead of synchronized read pointer
+  // FIFO is full when write pointer has wrapped once beyond synchronized read pointer
   assign full  = ( (write_ptr_gray[ADDR:ADDR-1] == ~read_ptr_gray_sync2[ADDR:ADDR-1]) &&
                    (write_ptr_gray[ADDR-2:0] == read_ptr_gray_sync2[ADDR-2:0]) );
-  // refresher: FIFO empty when pointers are equal after synchronization
+  // FIFO is empty when both pointers match after crossing into read domain
   assign empty = (write_ptr_gray_sync2 == read_ptr_gray);
   // gray to binary function
   function [ADDR:0] gray2bin;
@@ -88,7 +90,7 @@ module async_fifo #(
     integer bit_idx;
     begin
       gray2bin[ADDR] = gray_value[ADDR];
-      // refresher: XOR each bit with the higher-order result to decode Gray
+        // XOR each bit with the higher-order result to decode Gray
       for (bit_idx = ADDR-1; bit_idx >= 0; bit_idx = bit_idx-1)
         gray2bin[bit_idx] = gray2bin[bit_idx+1] ^ gray_value[bit_idx];
     end
