@@ -48,7 +48,8 @@ module array_structural_tb;
       write_data = i * 8'h33;  // recognizable pattern
     end
     @(posedge clk);
-    write_en = 0; write_data = '0; write_addr = '0;
+    // clear signals using Verilog-2001 zero values
+    write_en = 0; write_data = 0; write_addr = 0;
 
     // read phase
     // refresher: combinational mux returns selected word immediately
