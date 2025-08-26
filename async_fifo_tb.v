@@ -21,18 +21,30 @@
 `timescale 1ns/1ps
 module async_fifo_tb;
   localparam DATA_WIDTH = 8;
-  localparam DEPTH      = 4;
+  localparam DEPTH      = 8;
+  function integer clog2;
+    input integer value;
+    integer i;
+    begin
+      value = value - 1;
+      for (i = 0; value > 0; i = i + 1)
+        value = value >> 1;
+      clog2 = i;
+    end
+  endfunction
+  localparam ADDR = clog2(DEPTH);
 
   reg write_clk, write_reset_n, write_en;
   reg [DATA_WIDTH-1:0] write_data;
   reg read_clk, read_reset_n, read_en;
   wire [DATA_WIDTH-1:0] read_data;
   wire full, empty;
+  wire [ADDR:0] count;
 
   async_fifo #(.DATA_WIDTH(DATA_WIDTH), .DEPTH(DEPTH)) dut(
     .write_clk(write_clk), .write_reset_n(write_reset_n), .write_en(write_en), .write_data(write_data),
     .read_clk(read_clk), .read_reset_n(read_reset_n), .read_en(read_en), .read_data(read_data),
-    .full(full), .empty(empty)
+    .full(full), .empty(empty), .count(count)
   );
 
   initial begin write_clk = 0; forever #5 write_clk = ~write_clk; end
@@ -60,6 +72,10 @@ module async_fifo_tb;
       expected[i] = i * 8'h44;    // store for later comparison
     end
     @(posedge write_clk); write_en = 0; // stop writing
+    if (count !== DEPTH) begin
+      $display("Count mismatch after writes: expected %0d got %0d", DEPTH, count);
+      errors = errors + 1;
+    end
 
     // allow time before reading
     repeat (4) @(posedge read_clk);
@@ -78,6 +94,11 @@ module async_fifo_tb;
       end
     end
     @(posedge read_clk); read_en = 0; // stop reading
+    repeat (4) @(posedge write_clk);
+    if (count !== 0) begin
+      $display("Count mismatch after reads: expected 0 got %0d", count);
+      errors = errors + 1;
+    end
 
     if (errors == 0)
       $display("async_fifo_tb PASS");

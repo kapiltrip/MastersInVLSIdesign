@@ -12,6 +12,7 @@
 //   read_data       - data bus seen when reading
 //   full            - high when FIFO cannot take more writes
 //   empty           - high when FIFO has nothing to read
+//   count           - number of stored words for simple occupancy tracking
 //   fifo_mem        - array that keeps all data words
 //   write_ptr_bin   - binary form of write pointer
 //   write_ptr_gray  - write pointer changed into Gray code
@@ -30,11 +31,11 @@
 
 module async_fifo #(
   parameter DATA_WIDTH = 8,
-  parameter DEPTH = 16
+  parameter DEPTH = 8
 )(
   write_clk, write_reset_n, write_en, write_data,
   read_clk, read_reset_n, read_en, read_data,
-  full, empty
+  full, empty, count
 );
   // manual clog2 function avoids extra include files and stays in plain Verilog-2001
   function integer clog2;
@@ -59,6 +60,7 @@ module async_fifo #(
   output [DATA_WIDTH-1:0]   read_data;
   output                    full;
   output                    empty;
+  output [ADDR:0]           count;
   reg [DATA_WIDTH-1:0] fifo_mem [0:DEPTH-1];
   // FIFO memory seen by both clocks; array works like simple dual-port RAM
   reg [ADDR:0] write_ptr_bin, write_ptr_gray, read_ptr_bin, read_ptr_gray;
@@ -105,6 +107,7 @@ module async_fifo #(
   wire [ADDR:0] write_ptr_bin_sync, read_ptr_bin_sync;
   assign write_ptr_bin_sync = gray2bin(write_ptr_gray_sync2);
   assign read_ptr_bin_sync = gray2bin(read_ptr_gray_sync2);
+  assign count = write_ptr_bin - read_ptr_bin_sync;
   // status flags
   // FIFO is full when write pointer wrapped once beyond synced read pointer
   assign full  = ( (write_ptr_gray[ADDR:ADDR-1] == ~read_ptr_gray_sync2[ADDR:ADDR-1]) &&
