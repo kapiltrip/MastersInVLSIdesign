@@ -43,7 +43,8 @@ module async_fifo_tb;
   reg [DATA_WIDTH-1:0] expected [0:DEPTH-1];
 
   initial begin
-    write_reset_n = 0; read_reset_n = 0; write_en = 0; read_en = 0; write_data = '0;
+    // initialize all signals to zero without using SystemVerilog literal syntax
+    write_reset_n = 0; read_reset_n = 0; write_en = 0; read_en = 0; write_data = 0;
     #20; write_reset_n = 1; read_reset_n = 1;
 
     // write data into FIFO
