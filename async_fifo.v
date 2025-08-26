@@ -76,6 +76,7 @@ module async_fifo #(
   end
   // convert binary pointer to Gray so only one bit changes between updates
   always @* write_ptr_gray = (write_ptr_bin >> 1) ^ write_ptr_bin;
+
   // read pointer and data output handled in read clock domain
   reg [DATA_WIDTH-1:0] read_data_reg; // registered read data for clean handoff
   assign read_data = read_data_reg;
@@ -89,6 +90,7 @@ module async_fifo #(
     end
   end
   always @* read_ptr_gray = (read_ptr_bin >> 1) ^ read_ptr_bin;
+
   // synchronize pointers across clock domains
   always @(posedge write_clk or negedge write_reset_n) begin
     if (!write_reset_n) {read_ptr_gray_sync1, read_ptr_gray_sync2} <= 0;
