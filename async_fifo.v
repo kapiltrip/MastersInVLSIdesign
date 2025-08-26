@@ -31,7 +31,7 @@
 
 module async_fifo #(
   parameter DATA_WIDTH = 8,
-  parameter DEPTH = 16
+  parameter DEPTH = 8
 )(
   write_clk, write_reset_n, write_en, write_data,
   read_clk, read_reset_n, read_en, read_data,

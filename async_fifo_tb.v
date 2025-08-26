@@ -21,7 +21,8 @@
 `timescale 1ns/1ps
 module async_fifo_tb;
   localparam DATA_WIDTH = 8;
-  localparam DEPTH      = 4;
+  localparam DEPTH      = 8;
+
   function integer clog2;
     input integer value;
     integer i;
