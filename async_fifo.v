@@ -76,13 +76,21 @@ module async_fifo #(
   end
   // convert binary pointer to Gray so only one bit changes between updates
   always @* write_ptr_gray = (write_ptr_bin >> 1) ^ write_ptr_bin;
-  // read pointer logic looks like write side but uses read clock
+
+  // read pointer and data output handled in read clock domain
+  reg [DATA_WIDTH-1:0] read_data_reg; // registered read data for clean handoff
+  assign read_data = read_data_reg;
   always @(posedge read_clk or negedge read_reset_n) begin
-    if (!read_reset_n) read_ptr_bin <= 0;
-    else if (read_en && !empty) read_ptr_bin <= read_ptr_bin + 1; // move to next data word
+    if (!read_reset_n) begin
+      read_ptr_bin   <= 0;
+      read_data_reg  <= 0;
+    end else if (read_en && !empty) begin
+      read_data_reg  <= fifo_mem[read_ptr_bin[ADDR-1:0]]; // fetch current word
+      read_ptr_bin   <= read_ptr_bin + 1;                  // then move pointer
+    end
   end
   always @* read_ptr_gray = (read_ptr_bin >> 1) ^ read_ptr_bin;
-  assign read_data = fifo_mem[read_ptr_bin[ADDR-1:0]]; // data seen in read domain
+
   // synchronize pointers across clock domains
   always @(posedge write_clk or negedge write_reset_n) begin
     if (!write_reset_n) {read_ptr_gray_sync1, read_ptr_gray_sync2} <= 0;
