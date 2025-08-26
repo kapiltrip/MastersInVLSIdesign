@@ -24,22 +24,41 @@
 //   * add parameterizable overflow/underflow protection
 //   * incorporate formal verification or assertions
 //------------------------------------------------------------------------------
+
+// function: clog2 (defined within module)
+// purpose: compute ceiling of log2 for parameter calculations using only Verilog-2001
+
 module async_fifo #(
   parameter DATA_WIDTH = 8,
-  parameter DEPTH = 16,
-  parameter ADDR = $clog2(DEPTH)
+  parameter DEPTH = 16
 )(
-  input                     write_clk,
-  input                     write_reset_n,
-  input                     write_en,
-  input  [DATA_WIDTH-1:0]   write_data,
-  input                     read_clk,
-  input                     read_reset_n,
-  input                     read_en,
-  output [DATA_WIDTH-1:0]   read_data,
-  output                    full,
-  output                    empty
+  write_clk, write_reset_n, write_en, write_data,
+  read_clk, read_reset_n, read_en, read_data,
+  full, empty
 );
+  // manual clog2 function avoids extra include files while remaining pure Verilog-2001
+  function integer clog2;
+    input integer value; // value to be evaluated
+    integer i;
+    begin
+      value = value - 1;
+      for (i = 0; value > 0; i = i + 1)
+        value = value >> 1;
+      clog2 = i; // returns number of bits needed to index value-1
+    end
+  endfunction
+  localparam ADDR = clog2(DEPTH); // address width derived from DEPTH
+
+  input                     write_clk;
+  input                     write_reset_n;
+  input                     write_en;
+  input  [DATA_WIDTH-1:0]   write_data;
+  input                     read_clk;
+  input                     read_reset_n;
+  input                     read_en;
+  output [DATA_WIDTH-1:0]   read_data;
+  output                    full;
+  output                    empty;
   reg [DATA_WIDTH-1:0] fifo_mem [0:DEPTH-1];
   // FIFO memory is accessed from two clock domains; arrays act as simple dual-port RAM
   reg [ADDR:0] write_ptr_bin, write_ptr_gray, read_ptr_bin, read_ptr_gray;

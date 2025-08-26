@@ -14,11 +14,25 @@
 //   * include reset behavior tests
 //   * expand depth and add boundary condition checks
 //------------------------------------------------------------------------------
+
+// function: clog2 (defined below)
+// purpose: derive address width from depth using only Verilog-2001 constructs
 `timescale 1ns/1ps
 module array_behavioral_tb;
+  // manual clog2 function avoids extra include files while remaining pure Verilog-2001
+  function integer clog2;
+    input integer value; // value to evaluate
+    integer i;
+    begin
+      value = value - 1;
+      for (i = 0; value > 0; i = i + 1)
+        value = value >> 1;
+      clog2 = i; // number of address bits required
+    end
+  endfunction
   localparam WIDTH = 8;
   localparam DEPTH = 4;
-  localparam ADDR  = $clog2(DEPTH);
+  localparam ADDR  = clog2(DEPTH); // address width based on depth
 
   reg clk;
   reg [WIDTH-1:0] write_data;
@@ -50,7 +64,8 @@ module array_behavioral_tb;
       write_data = i * 8'h11;      // simple pattern (multiples of 0x11)
     end
     @(posedge clk);
-    write_en = 0; write_data = '0; write_addr = '0;
+    // clear control signals and data using standard Verilog literals
+    write_en = 0; write_data = 0; write_addr = 0;
 
     // read phase
     // refresher: read_data updates one cycle after address because of registered output
