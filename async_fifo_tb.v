@@ -1,3 +1,13 @@
+<<<<<<< HEAD
+=======
+//------------------------------------------------------------------------------
+// Testbench: async_fifo_tb
+// Description: Drives the async_fifo with independent write and read clocks to
+//              demonstrate safe data transfer across clock domains. The testbench
+//              pushes a sequence of bytes into the FIFO, then reads them out while
+//              checking the full and empty indicators and the reported count.
+//------------------------------------------------------------------------------
+>>>>>>> 20001dbf0231a59da6fe8b793fb4481ad898a08f
 `timescale 1ns/1ps
 
 module async_fifo_tb;
@@ -190,5 +200,8 @@ end    //to create real asynchronous nature , i give it diffenent time . Hence a
     else             $display("FAIL: %0d error(s) observed", errors);
     $finish;
   end
+<<<<<<< HEAD
 
+=======
+>>>>>>> 20001dbf0231a59da6fe8b793fb4481ad898a08f
 endmodule

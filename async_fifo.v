@@ -1,29 +1,10 @@
 //------------------------------------------------------------------------------
 // Module: async_fifo
-// Feature: asynchronous FIFO with Gray-coded read/write pointers and status flags
-// Variables:
-//   write_clk       - clock that drives writes
-//   write_reset_n   - active-low reset for write side
-//   write_en        - enables storing data into FIFO
-//   write_data      - data bus used when writing
-//   read_clk        - clock that drives reads
-//   read_reset_n    - active-low reset for read side
-//   read_en         - enables taking data from FIFO
-//   read_data       - data bus seen when reading
-//   full            - high when FIFO cannot take more writes
-//   empty           - high when FIFO has nothing to read
-//   count           - number of stored words for simple occupancy tracking
-//   fifo_mem        - array that keeps all data words
-//   write_ptr_bin   - binary form of write pointer
-//   write_ptr_gray  - write pointer changed into Gray code
-//   read_ptr_bin    - binary form of read pointer
-//   read_ptr_gray   - read pointer changed into Gray code
-//   write_ptr_gray_sync* / read_ptr_gray_sync* - pointers moved safe across
-//       clock domains
-// Future Improvements:
-//   * expose almost_full/almost_empty status outputs
-//   * add parameterizable overflow/underflow protection
-//   * incorporate formal verification or assertions
+// Description: Parameterized asynchronous FIFO that safely moves data between
+//              unrelated write and read clocks. Gray-coded pointers cross the
+//              clock boundary through double-register synchronizers, allowing
+//              full and empty status to be derived without metastability. The
+//              design also exposes a simple word count for monitoring occupancy.
 //------------------------------------------------------------------------------
 
 // function: clog2 (defined within module)

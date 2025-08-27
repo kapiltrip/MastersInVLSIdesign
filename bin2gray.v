@@ -1,12 +1,9 @@
 //------------------------------------------------------------------------------
 // Module: bin2gray
-// Feature: converts binary code to Gray code using pure combinational logic
-// Variables:
-//   bin  - binary input vector
-//   gray - output Gray-coded vector
-// Future Improvements:
-//   * add inverse gray2bin module for completeness
-//   * parameterize for optional pipelining
+// Description: Combinational converter that maps a binary value to its Gray-code
+//              equivalent. Gray coding changes only one bit between successive
+//              values, which is useful for pointer synchronization across clock
+//              domains or for minimizing switching noise.
 //------------------------------------------------------------------------------
 module bin2gray #(parameter WIDTH = 8) (
   input  [WIDTH-1:0] bin,

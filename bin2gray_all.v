@@ -1,8 +1,9 @@
 //============================================================
 // Module and Testbench: bin2gray and self-checking TB
-//   - Pure Verilog-2001 code in a single file for clarity
-//   - Converts binary input to Gray code using XOR
-//   - Exhaustively verifies conversion and Gray adjacency
+// Description: Consolidated source that contains both the bin2gray module and
+//              an accompanying testbench. It demonstrates the XOR-based
+//              conversion and performs an exhaustive sweep to validate both the
+//              transformation and the one-bit adjacency property of Gray code.
 //============================================================
 `timescale 1ns/1ps
 
