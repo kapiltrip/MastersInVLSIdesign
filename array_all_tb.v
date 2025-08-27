@@ -1,7 +1,9 @@
 //------------------------------------------------------------------------------
 // Testbench: array_all_tb
-// Description: Runs basic tests for array_behavioral, array_dataflow,
-//              and array_structural memories.
+// Description: Self-checking environment that instantiates each memory style
+//              from array_all.v. The testbench writes patterned data into the
+//              behavioral, dataflow, and structural memories and then reads it
+//              back to confirm identical behavior across all implementations.
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 module array_all_tb;
@@ -62,6 +64,8 @@ module array_all_tb;
   );
 
   // task to test behavioral memory
+  // Exercises the synchronous RAM style by writing distinct bytes then
+  // performing registered reads to ensure data integrity.
   task test_behavioral;
     integer i; integer errors;
     begin
@@ -92,6 +96,8 @@ module array_all_tb;
   endtask
 
   // task to test dataflow memory
+  // Similar to the behavioral test but checks the combinational read port
+  // by sampling data without waiting for an additional clock edge.
   task test_dataflow;
     integer i; integer errors;
     begin
@@ -122,6 +128,8 @@ module array_all_tb;
   endtask
 
   // task to test structural memory
+  // Validates the flip-flop-based memory by confirming each decoded word
+  // stores and returns the expected pattern.
   task test_structural;
     integer i; integer errors;
     begin

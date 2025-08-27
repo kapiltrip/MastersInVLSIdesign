@@ -1,9 +1,10 @@
 //============================================================
- // Verilog-2001 self-checking testbench for bin2gray
- // - Exhaustively tests all inputs for chosen WIDTH
- // - Compares DUT output to reference model: g = b ^ (b >> 1)
- // - Verifies Gray adjacency (HD=1) for 0,1,2,... input sequence
- //============================================================
+// Testbench: tb_bin2gray
+// Description: Self-checking environment for the bin2gray module. The testbench
+//              sweeps through every possible input value, compares the DUT
+//              output against a reference model, and ensures consecutive Gray
+//              codes differ by only one bit.
+//============================================================
  `timescale 1ns/1ps
  module tb_bin2gray;
   parameter WIDTH = 8;
