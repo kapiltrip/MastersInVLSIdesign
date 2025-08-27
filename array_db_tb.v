@@ -16,10 +16,10 @@ module array_db_tb;
         value = value >> 1;
       clog2 = i;
     end
-  endfunction
+endfunction 
 
   localparam WIDTH = 8;
-  localparam DEPTH = 4;
+  localparam DEPTH = 8;
   localparam ADDR  = clog2(DEPTH);
 
   // shared clock
@@ -38,14 +38,15 @@ module array_db_tb;
     .clk(clk), .write_data(write_data), .write_addr(write_addr),
     .write_en(write_en), .read_addr(read_addr), .read_data(read_data)
   );
-
-  integer i; integer errors;
+ 
+  integer i; 
+  integer errors;
   initial begin
     errors = 0;
     write_en = 0; write_data = 0; write_addr = 0; read_addr = 0;
     // write pattern
     for (i = 0; i < DEPTH; i = i + 1) begin
-      @(negedge clk);
+      @(negedge clk);           //so the inputs of the positive edges of array are stable .
       write_en = 1;
       write_addr = i[ADDR-1:0];
       write_data = i * 8'h11;
