@@ -1,11 +1,17 @@
 //------------------------------------------------------------------------------
 // File: array_db.v
-// Description: Simple synchronous memory using behavioral modeling.
+// Description: Simple synchronous memory using behavioral modeling. The design
+//              illustrates a parameterized RAM with a single clock, registered
+//              read data, and synchronous write capability, making it a compact
+//              template for small buffers or register files.
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // Module: array_behavioral_simple
 // Feature: parameterized memory with synchronous write and registered read
+// This lightweight module demonstrates how a reg array can model a memory
+// block. Data is written on the rising edge when enabled, and the addressed
+// word is presented on the output at the next clock cycle.
 //------------------------------------------------------------------------------
 module array_behavioral_simple #(parameter WIDTH=8, DEPTH=4, ADDR=2) (
   input                 clk,

@@ -1,12 +1,20 @@
 //------------------------------------------------------------------------------
 // File: array_all.v
-// Description: Collection of simple memory implementations showcasing
-//              behavioral, dataflow, and structural coding styles.
+// Description: Collection of simple memory implementations showcasing behavioral,
+//              dataflow, and structural coding styles. The modules highlight how
+//              identical memory behavior can be written in different ways: the
+//              behavioral model registers both ports, the dataflow version
+//              exposes a combinational read, and the structural implementation
+//              builds the storage out of flip-flops to reveal the underlying
+//              hardware.
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // Module: array_behavioral
 // Feature: parameterized memory with synchronous write and registered read
+// This behavioral description uses a reg array to represent memory and a
+// single clocked process to model write and read operations, mirroring the
+// style of synchronous RAM available in many devices.
 //------------------------------------------------------------------------------
 module array_behavioral #(parameter WIDTH=8, DEPTH=16, ADDR=4) (
   input                 clk,
@@ -17,6 +25,12 @@ module array_behavioral #(parameter WIDTH=8, DEPTH=16, ADDR=4) (
   output reg [WIDTH-1:0] read_data
 );
   reg [WIDTH-1:0] mem_array [0:DEPTH-1];
+  integer idx;
+  initial begin
+    for (idx = 0; idx < DEPTH; idx = idx + 1)
+      mem_array[idx] = {WIDTH{1'b0}};
+    read_data = {WIDTH{1'b0}};
+  end
   always @(posedge clk) begin
     if (write_en)
       mem_array[write_addr] <= write_data; // store new data into selected word
@@ -27,6 +41,9 @@ endmodule
 //------------------------------------------------------------------------------
 // Module: array_dataflow
 // Feature: memory with synchronous write and combinational read access
+// Here the memory still uses a reg array, but the read port is modeled as a
+// simple continuous assignment, producing the selected word immediately
+// without waiting for a clock edge.
 //------------------------------------------------------------------------------
 module array_dataflow #(parameter WIDTH=8, DEPTH=16, ADDR=4) (
   input              clk,
@@ -37,6 +54,11 @@ module array_dataflow #(parameter WIDTH=8, DEPTH=16, ADDR=4) (
   output [WIDTH-1:0] read_data
 );
   reg [WIDTH-1:0] mem_array [0:DEPTH-1];
+  integer idx;
+  initial begin
+    for (idx = 0; idx < DEPTH; idx = idx + 1)
+      mem_array[idx] = {WIDTH{1'b0}};
+  end
   always @(posedge clk) begin
     if (write_en)
       mem_array[write_addr] <= write_data; // store data on rising edge
@@ -47,6 +69,8 @@ endmodule
 //------------------------------------------------------------------------------
 // Module: dff
 // Feature: simple enabled D flip-flop used by structural memory
+// The flip-flop captures the input on a rising clock edge when enable is high,
+// providing the basic storage element for the structural memory example.
 //------------------------------------------------------------------------------
 module dff (
   input clk,
@@ -61,6 +85,9 @@ endmodule
 //------------------------------------------------------------------------------
 // Module: array_structural
 // Feature: 4-word memory built from D flip-flops with decoded write enables
+// The structural implementation instantiates one flip-flop per stored bit and
+// decodes the write address into individual enables, providing a clear view of
+// the hardware resources consumed by a small memory.
 //------------------------------------------------------------------------------
 module array_structural #(parameter WIDTH=8) (
   input clk,

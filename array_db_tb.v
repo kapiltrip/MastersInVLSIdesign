@@ -1,6 +1,9 @@
 //------------------------------------------------------------------------------
 // Testbench: array_db_tb
-// Description: Runs basic tests for array_behavioral_simple memory.
+// Description: Simple self-checking testbench for array_behavioral_simple. It
+//              writes a known pattern into the memory and then reads back each
+//              location on subsequent cycles, flagging any mismatches to ensure
+//              the memory model behaves as intended.
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 module array_db_tb;

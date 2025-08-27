@@ -1,22 +1,9 @@
 //------------------------------------------------------------------------------
 // Testbench: async_fifo_tb
-// Feature: exercises async_fifo with independent clocks and self-checking reads
-// Variables:
-//   write_clk     - write domain clock
-//   write_reset_n - write domain reset (active low)
-//   write_en      - enables writes into FIFO
-//   write_data    - stimulus data for FIFO input
-//   read_clk      - read domain clock
-//   read_reset_n  - read domain reset (active low)
-//   read_en       - enables data retrieval
-//   read_data     - data observed from FIFO output
-//   full/empty    - status flags indicating FIFO state
-//   expected      - array holding reference data values
-//   errors        - mismatch counter
-// Future Improvements:
-//   * randomize clock periods and insert backpressure scenarios
-//   * check overflow/underflow protection logic
-//   * include coverage metrics or assertions
+// Description: Drives the async_fifo with independent write and read clocks to
+//              demonstrate safe data transfer across clock domains. The testbench
+//              pushes a sequence of bytes into the FIFO, then reads them out while
+//              checking the full and empty indicators and the reported count.
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 module async_fifo_tb;
